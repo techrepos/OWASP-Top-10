@@ -1,0 +1,65 @@
+﻿
+@model ABCBankingWebApp.Models.FundTransfer
+
+@{
+    ViewData["Title"] = "Fund Transfer";
+
+    var drpList = ViewData["drpList"] as SelectList;
+
+    
+}
+
+
+<h4>Fund Transfer</h4>
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <form method="post">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <div class="form-group">
+                <label asp-for="AccountFrom" class="control-label"></label>
+                <select asp-for="AccountFrom" class="form-control"
+                        asp-items="@drpList">
+                    <option value="">-- Select Account --</option>
+                </select>
+                <span asp-validation-for="AccountFrom" class="text-danger" />
+            </div>
+            <div class="form-group">
+                <label asp-for="AccountTo" class="control-label"></label>
+                <select asp-for="AccountTo" class="form-control"
+                        asp-items="@drpList">
+                    <option value="">-- Select Account --</option>
+                </select>
+                <span asp-validation-for="AccountTo" class="text-danger" />
+            </div>
+            <div class="form-group">
+                <label asp-for="TransactionDate" class="control-label"></label>
+                <input asp-for="TransactionDate" class="form-control" />
+                <span asp-validation-for="TransactionDate" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Amount" class="control-label"></label>
+                <input asp-for="Amount" class="form-control" />
+                <span asp-validation-for="Amount" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Note" class="control-label"></label>
+                <textarea asp-for="Note" class="form-control"></textarea>
+                <span asp-validation-for="Note" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <input type="submit" value="Send Money" class="btn btn-primary" />
+            </div>
+        </form>
+    </div>
+</div>
+
+<div>
+    <a asp-asp-controller="FundTransfer" asp-action="Index">Back to List of Fund Transfers</a>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

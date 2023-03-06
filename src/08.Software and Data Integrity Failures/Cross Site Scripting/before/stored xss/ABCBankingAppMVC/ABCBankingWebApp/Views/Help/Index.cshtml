@@ -1,0 +1,46 @@
+﻿@model IEnumerable<ABCBankingWebApp.Models.Knowledge>
+
+@{
+    ViewData["Title"] = "How can we help?";
+}
+
+<h1>How can we help?</h1>
+
+<p>
+
+</p>
+<form method="post">
+    <p>
+        Enter Keyword: <input type="text" id="SearchString" name="SearchString" />
+        <input type="submit" value="Search" />
+    <p>
+        You Searched @ViewData["SearchString"] </p>
+    </p>
+</form>
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.Topic)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Description)
+            </th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Topic)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Description)
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
