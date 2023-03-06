@@ -172,7 +172,7 @@ With no URL validation in place, the URL redirection can be abused and sent to a
 controlled by an attacker whenever a tricked customer clicks a malicious URL
 
 
-```
+```c#
 public async Task<IActionResult> OnPostAsync(string returnUrl = null)
         {
             returnUrl ??= Url.Content("~/");
@@ -195,7 +195,7 @@ public async Task<IActionResult> OnPostAsync(string returnUrl = null)
 
                     return Redirect(returnUrl);
 
-``
+```
 
 The LocalRedirect method performs the same redirection, except it will throw an
 InvalidOperationException exception when the URL is trying to redirect to a website that is
