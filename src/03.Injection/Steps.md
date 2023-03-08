@@ -1,4 +1,4 @@
-# SQL Injection
+## SQL Injection
 ## Using ADO.NET
 
 1. Show the filter functionality
@@ -62,7 +62,7 @@ cmd.CommandText = "get_FundTransfers";
 cmd.Parameters.AddWithValue("@searchparam", search);
 ```
 
-# OS Command Injection
+## OS Command Injection
 ASP.NET Core has a vast set of classes and libraries that enable them to execute OS Commands in the host. if your code is not written securely then this flaw enables to execute shell commands
 
 ## Vulnerability
@@ -120,7 +120,7 @@ public async Task FileCopyAsync(string sourceFileName, string destinationFileNam
 
 ```
 
-# XPATH Injection
+## XPATH Injection
 
 XPATH is a language construct used for selecting nodes from an XML document, which is somewhat similar to SQL
 
