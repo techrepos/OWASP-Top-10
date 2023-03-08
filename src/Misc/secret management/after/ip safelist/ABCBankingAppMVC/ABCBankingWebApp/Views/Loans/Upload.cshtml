@@ -1,0 +1,23 @@
+﻿@model ABCBankingWebApp.Models.Loan
+
+@{
+    ViewData["Title"] = "Upload Loan Application";
+}
+
+<h1>Apply for a Loan</h1>
+
+<h4>Upload</h4>
+<hr />
+<form method="post" enctype="multipart/form-data" asp-action="UploadFile">
+    <input type="file" id="Upload" name="Upload" />
+    <input type="submit" />
+</form>
+<div>
+    <a asp-action="Index">Back to List</a>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}
