@@ -1,0 +1,5 @@
+{
+   "$type": "System.IO.FileInfo, System.IO.FileSystem",
+   "fileName": "settings.config",
+   "isReadOnly": true
+}

@@ -288,3 +288,177 @@ The above code
 - `QueueProcessingOrder` to `OldestFirst`.
 - `QueueLimit` to 2.
 - Calls `UseRateLimiter` to enable rate limiting.
+
+
+## Secure Cookie Policy
+
+Cookies are an essential part of web application development. It is a means to maintain a state in a stateless HTTP protocol and carry the most vital information that's used in security-like tokens and session data
+
+SameSite is a relatively new cookie attribute (at the time of writing) and is utilized to limit third-party websites from accessing a cookie marked with the context of a first party.
+
+
+```c#
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.CookiePolicy;
+
+//add the snippet in Program.cs
+
+services.Configure<CookiePolicyOptions>(options =>
+{
+    options.MinimumSameSitePolicy = SameSiteMode.Strict;
+    options.Secure = Environment.IsDevelopment() ? CookieSecurePolicy.None : CookieSecurePolicy.Always;
+    options.HttpOnly = HttpOnlyPolicy.Always;
+});
+
+
+```
+
+The `MinimumSameSitePolicy` property of the cookie policy's options is assigned with the `SameSiteMode.Strict` value, marking the `SameSite` cookie attribute with a `Strict` value
+
+If session state cookies from the session middleware are a concern, you can limit the session state cookies to the first-party context by assigning the same SameSite property with `SameSiteMode.Strict`
+```c#
+services.AddSession(options =>
+{
+    options.Cookie.Name = ".OnlineBanking.Session";
+    options.Cookie.SameSite = SameSiteMode.Strict;
+    options.Cookie.SecurePolicy =  CookieSecurePolicy.Always;
+    options.IdleTimeout = TimeSpan.FromSeconds(10);
+});
+
+```
+Execute the cookie policy middleware by making a call to the UseCookiePolicy method
+
+```c#
+app.UseRouting();
+app.UseCookiePolicy();
+app.UseAuthentication();
+```
+
+Setting the `SameSite` cookie attribute to `Strict` limits the context as to when the cookies are sent as part of a request. As the name implies, cookies are only strictly sent within `same-site` and `first-party` requests, thus preventing third-party websites or web applications from sending the cookie when initiating the requests. This can be configured with the Session and Antiforgery service options
+
+> Using the SameSite attribute requires the Secure attribute. Modern browsers will automatically reject the cookie if the SameSite
+attribute is not accompanied by a Secure attribute.
+> Modern browsers, by default, will set your cookie's SameSite attribute to Lax if you don't explicitly specify a value. Lax allows
+the cookie to be sent in requests when a user follows a link
+
+
+Limiting your cookies to first-party requests also prevents your ASP.NET Core web application from cross-site attacks and vulnerabilities such as Cross-Site Request Forgery (CSRF)
+
+
+ > If your ASP.NET Core web application integrates with third-party websites extensively, and these sites need to use your cookies, users might experience some malfunctioning because of the restrictive nature of the `Strict` SameSite attribute. Depending on the risk level of your web app, you may want to lower the restriction to `SameSiteMode.Lax`
+
+
+ ## Content Security Policy
+
+ Browsers have built-in security mechanisms to protect its users from attacks, making the overall user experience safe from web-based vulnerabilities. Additionally, how we write our code in our web apps is crucial to instructing the browser on how to enable these security features
+
+ We can tell the browser which hosts are safe to pull resources from and where it is safe to execute the scripts. These whitelisting rules can be defined using a `CSP`.
+
+ ```c#
+app.Use(async (context, next) =>
+{
+    context.Response.Headers.Add("X-XSS-Protection", "1; mode=block");
+    context.Response.Headers.Add("X-Content-Type- Options", "nosniff");
+    context.Response.Headers.Add("X-Frame-Options", "DENY");
+    
+    //CSP Header
+    string scriptSrc = "script-src 'self' https://cdnjs.cloudflare.com;";
+    string styleSrc = "style-src 'self' 'unsafe-inline';";
+    string imgSrc = "img-src 'self'; ";
+    string objSrc = "object-src 'none';";
+    string defaultSrc = "default-src 'self';";
+    string connectSrc = "connect-src https: wss: http://localhost:58082;";
+    string csp = $"{defaultSrc}{scriptSrc}{styleSrc} {imgSrc} {objSrc}";
+    //context.Response.Headers.Add($"Content-Security-Policy-Report-Only", csp);
+    context.Response.Headers.Add($"Content-Security-Policy", csp);
+
+    await next();
+});
+
+ ```
+
+ Here, we have defined string variables to hold each of the most common CSP headers and their source locations. Then, we added them to the HTTP response headers collection as a `Content-Security-Policy` HTTP header
+
+ Each of the string variables corresponds to a CSP header
+
+ `scriptSrc` defines a list of trusted source locations to load JavaScript from .The `self` value pertains
+to our web app itself and the host (https://cdnjs.cloudflare.com) where we   downloaded the underscore.js library:
+
+`styleSrc` defines a list of trusted source locations for loading stylesheets. We are using self here to indicate that it is acceptable to load stylesheets local to our web app, but we are also using unsafe-inline to allow the use of inline `<style>` elements. It is generally not safe to use `unsafe-inline`, but since there is no user-controlled input that can influence the stylesheet of our  web app
+
+`img-src`  defines the acceptable values for trusted source for our images
+
+To have a safe CSP, `object-src` needs to be set to none. This CSP header will list the acceptable
+sources for plugins and was kept for legacy applets, which is an obsolete technology
+
+ `default-src `CSP header is the fallback for all other CSP headers that weren't defined.
+
+ There are tools online that you can use to generate your own CSP
+ -  https://report-uri.com/home/generate
+ -  Google's CSP validator, available at https://csp-evaluator.withgoogle.com/
+
+
+ ## Fixing leftover debug code
+
+The .NET platform offers a wide array of libraries and components for debugging, including diagnostics and tracing effectively. However, it is a bad practice for developers to leave debugging code as-is and neglect to remove it from the repository or add conditional checks, thus leading to unnecessary code being deployed in production
+
+
+The `IsDevelopment` method checks whether the code is running under the context of a development environment. This method is a useful test before we execute debugging methods
+such as `UseStatusCodePages` and `AddDatabaseDeveloperPageExceptionFilter`. `AddDatabaseDeveloperPageExceptionFilter` could potentially expose sensitive information
+when invoked by a database error. 
+
+Performing secure code reviews regularly and executing static application security testing as part of the development cycle can help detect these problems early
+
+
+`UseStatusCodePages` is a piece of middleware that provides status code as a response. This is useful for determining what status code was returned by our sapp, but these status codes are not useful to our users
+
+`AddDatabaseDeveloperPageExceptionFilter` is an exception filter that provides exception details related to database operations. This method is useful for debugging and finding
+resolutions to DB-related issues. However, it must not be called in a production environment.
+
+```c#
+if (builder.Environment.IsDevelopment())
+{
+    builder.Services.AddHttpsRedirection(options =>
+    {
+        options.RedirectStatusCode
+        = StatusCodes.Status307TemporaryRedirect;
+        options.HttpsPort = 5001;
+    });
+    builder.Services.AddDatabaseDeveloperPageExceptionFilter();
+}
+else
+{
+    builder.Services.AddHsts(options =>
+    {
+        options.ExcludedHosts.Clear();
+        options.Preload = true;
+        options.IncludeSubDomains = true;
+        options.MaxAge = TimeSpan.FromDays(60);
+    });
+
+    builder.Services.AddHttpsRedirection(options =>
+    {
+        options.RedirectStatusCode
+        = StatusCodes.Status308PermanentRedirect;
+        options.HttpsPort = 443;
+    });
+
+    
+}
+
+//code omitted for brevity
+
+if (app.Environment.IsDevelopment())
+{
+    app.UseDeveloperExceptionPage();
+    app.UseStatusCodePages("text/plain", "Status code page, status code: {0}");
+
+}
+else
+{
+    app.UseExceptionHandler("/Home/Error");
+    app.UseHsts();
+
+}
+
+```
