@@ -103,7 +103,7 @@ builder.Services.AddAuthorization(options =>
 builder.Services.AddControllersWithViews();
 
 builder.Services.AddHttpClient();
-builder.Services.AddDatabaseDeveloperPageExceptionFilter();
+
 
 if (builder.Environment.IsDevelopment())
 {
@@ -113,6 +113,7 @@ if (builder.Environment.IsDevelopment())
         = StatusCodes.Status307TemporaryRedirect;
         options.HttpsPort = 5001;
     });
+    builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 }
 else
 {
@@ -168,8 +169,8 @@ var app = builder.Build();
 if (app.Environment.IsDevelopment())
 {
     app.UseDeveloperExceptionPage();
+    app.UseStatusCodePages("text/plain", "Status code page, status code: {0}");
 
-    
 }
 else
 {
@@ -202,7 +203,7 @@ app.Use(async (context, next) =>
 app.UseHttpsRedirection();
 
 app.UseStaticFiles();
-app.UseStatusCodePages("text/plain", "Status code page, status code: {0}");
+
 
 app.UseRouting();
 

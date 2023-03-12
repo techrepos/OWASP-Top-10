@@ -48,6 +48,7 @@ namespace ABCBankingWebApp.Controllers
 
 
         [HttpGet]
+        [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
         public IActionResult Create()
         {
             ViewData["drpList"] = PopulateAccountsDropDownList();
@@ -56,6 +57,10 @@ namespace ABCBankingWebApp.Controllers
         }
 
         [HttpPost]
+
+
+
+
         public async Task<IActionResult> Create([FromForm] FundTransfer fundtransfer)
         {
 

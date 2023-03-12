@@ -1,0 +1,17 @@
+
+<h2>Angular Sanitized Binding</h2>
+<div>{{sanitizedHtml}}</div>
+<div [innerHTML]="trustedHtml"></div>
+
+<p><a [href]="sanitizedUrl">Protected Link</a></p>
+<p><a [href]="trustedUrl">Dangerous Link</a></p>
+<br/>
+
+<button (click)="togglePosts()">Toggle Message Board</button>
+
+<div *ngIf="showPosts">
+  <h2>Message Board</h2>
+  <div *ngFor="let post of posts">
+    <app-post [post]="post"></app-post>
+  </div>
+</div>
